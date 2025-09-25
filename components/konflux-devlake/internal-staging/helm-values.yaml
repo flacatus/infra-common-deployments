@@ -35,11 +35,11 @@ grafana:
   env:
     TZ: "UTC"
     GF_SERVER_SERVE_FROM_SUBPATH: "true"
-    GF_SERVER_ROOT_URL: "%(protocol)s://%(domain)s/grafana/"
   grafana.ini:
     server:
       serve_from_subpath: "true"
-      root_url: "%(protocol)s://%(domain)s/grafana/"
+      root_url: "https://konflux-devlake-ui-konflux-devlake.apps.rosa.gzqkd-6tm9g-h9c.jryo.p3.openshiftapps.com/grafana/"
+      domain: "konflux-devlake-ui-konflux-devlake.apps.rosa.gzqkd-6tm9g-h9c.jryo.p3.openshiftapps.com"
     auth.google:
       enabled: true
       client_id: "${GF_AUTH_GOOGLE_CLIENT_ID}"  # Set via secret
