@@ -15,8 +15,8 @@ spec:
     spec:
       project: default
       source:
-        repoURL: https://github.com/redhat-appstudio/infra-common-deployments.git
-        targetRevision: main
+        repoURL: https://github.com/flacatus/infra-common-deployments.git
+        targetRevision: g_oauth
         path: '{{values.sourceRoot}}/{{values.environment}}'
       destination:
         namespace: konflux-devlake
