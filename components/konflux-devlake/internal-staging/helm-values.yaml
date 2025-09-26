@@ -38,20 +38,17 @@ grafana:
   grafana.ini:
     server:
       serve_from_subpath: "true"
-      root_url: "https://konflux-devlake-ui-konflux-devlake.apps.rosa.gzqkd-6tm9g-h9c.jryo.p3.openshiftapps.com/grafana/"
-      domain: "konflux-devlake-ui-konflux-devlake.apps.rosa.gzqkd-6tm9g-h9c.jryo.p3.openshiftapps.com"
+      root_url: "${GF_SERVER_ROOT_URL}"
     auth.google:
       enabled: true
       client_id: "${GF_AUTH_GOOGLE_CLIENT_ID}"  # Set via secret
       client_secret: "${GF_AUTH_GOOGLE_CLIENT_SECRET}"  # Set via secret
       scopes: "https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email openid"
-      auth_url: "https://accounts.google.com/o/oauth2/v2/auth"
-      token_url: "https://oauth2.googleapis.com/token"
-      api_url: "https://openidconnect.googleapis.com/v1/userinfo"
+      auth_url: "https://accounts.google.com/o/oauth2/auth"
+      token_url: "https://accounts.google.com/o/oauth2/token"
+      api_url: "https://www.googleapis.com/oauth2/v1/userinfo"
       allowed_domains: "redhat.com"
       allow_sign_up: true
-      auto_login: true
-      redirect_uri: "https://konflux-devlake-ui-konflux-devlake.apps.rosa.gzqkd-6tm9g-h9c.jryo.p3.openshiftapps.com/grafana/login/google"
 ui:
   securityContext: {}
   containerSecurityContext: {}
