@@ -8,7 +8,7 @@ spec:
     - clusters:
         values:
           sourceRoot: components/argo-rollouts
-          environment: ""
+          environment: internal-staging
   template:
     metadata:
       name: argo-rollouts-{{nameNormalized}}
