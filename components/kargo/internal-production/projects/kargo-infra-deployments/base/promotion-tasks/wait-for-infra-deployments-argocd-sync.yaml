@@ -27,6 +27,7 @@ spec:
         insecureSkipTLSVerify: true
         successExpression: |
           response.status == 200 &&
+          size(filter(response.body.items, {.metadata.name matches '^${{ vars.component }}-(${{ vars.clusters }})$'})) > 0 &&
           all(
             filter(response.body.items, {.metadata.name matches '^${{ vars.component }}-(${{ vars.clusters }})$'}),
             {
@@ -57,7 +58,9 @@ spec:
               )
           - name: lastCommit
             fromExpression: |
-              filter(response.body.items, {.metadata.name matches '^${{ vars.component }}-(${{ vars.clusters }})$'})[0].status?.sync?.revision ?? 'unknown'
+              size(filter(response.body.items, {.metadata.name matches '^${{ vars.component }}-(${{ vars.clusters }})$'})) > 0 ?
+                (filter(response.body.items, {.metadata.name matches '^${{ vars.component }}-(${{ vars.clusters }})$'})[0].status?.sync?.revision ?? 'unknown') :
+                'unknown'
 
     - uses: compose-output
       as: output
