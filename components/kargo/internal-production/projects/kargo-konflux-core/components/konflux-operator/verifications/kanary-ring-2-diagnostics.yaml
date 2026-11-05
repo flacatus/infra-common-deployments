@@ -1,0 +1,297 @@
+---
+# Per-cluster/type diagnostics join the existing kanary-production gate in ONE AnalysisRun.
+# Dry-run failures are visible but cannot change the promotion decision.
+# A missing or older-than-one-hour signal returns an empty result, not success.
+# kanary_up still reflects the producer semantics; unknown outcomes may emit 1.
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata:
+  name: kanary-operator-ring-2-diagnostics
+spec:
+  args:
+  - name: clusters
+  - name: expected-cluster-count
+  - name: namespace
+    value: konflux-otel
+  - name: types
+    value: container-single-arch
+  - name: initial-delay
+    value: 40m
+  - name: check-interval
+    value: 40m
+  - name: check-count
+    value: '1'
+  - name: failure-limit
+    value: '1'
+  - name: prometheus-address
+    value: https://observatorium-mst.api.openshift.com/api/metrics/v1/rhtap
+  - name: token-url
+    value: https://sso.redhat.com/auth/realms/redhat-external/protocol/openid-connect/token
+  - name: oauth-client-id
+    valueFrom:
+      secretKeyRef:
+        name: kargo-rhobs-production
+        key: client_id
+  - name: oauth-client-secret
+    valueFrom:
+      secretKeyRef:
+        name: kargo-rhobs-production
+        key: client_secret
+  - name: max-signal-age-seconds
+    value: '3600'
+  dryRun:
+  - metricName: ^kanary-up-.+$
+  measurementRetention:
+  - metricName: ^kanary-up-.+$
+    limit: 36
+  metrics:
+  - name: kanary-up-kflux-fedora-01-single-arch
+    initialDelay: '{{args.initial-delay}}'
+    interval: '{{args.check-interval}}'
+    count: '{{args.check-count}}'
+    failureLimit: '{{args.failure-limit}}'
+    successCondition: len(result) == 1 && result[0] == 1
+    provider:
+      prometheus:
+        address: '{{args.prometheus-address}}'
+        timeout: 40
+        authentication:
+          oauth2:
+            tokenUrl: '{{args.token-url}}'
+            clientId: '{{args.oauth-client-id}}'
+            clientSecret: '{{args.oauth-client-secret}}'
+            scopes:
+            - profile
+        query: |
+          min(
+            kanary_up{namespace="{{args.namespace}}", tested_cluster="kflux-fedora-01", type="container-single-arch"}
+            and on (tested_cluster, type)
+            (kanary_last_push_timestamp{namespace="{{args.namespace}}", tested_cluster="kflux-fedora-01", type="container-single-arch"}
+              >= time() - {{args.max-signal-age-seconds}})
+          )
+    failureCondition: len(result) != 1 || result[0] != 1
+  - name: kanary-up-kflux-fedora-01-multi-arch
+    initialDelay: '{{args.initial-delay}}'
+    interval: '{{args.check-interval}}'
+    count: '{{args.check-count}}'
+    failureLimit: '{{args.failure-limit}}'
+    successCondition: len(result) == 1 && result[0] == 1
+    provider:
+      prometheus:
+        address: '{{args.prometheus-address}}'
+        timeout: 40
+        authentication:
+          oauth2:
+            tokenUrl: '{{args.token-url}}'
+            clientId: '{{args.oauth-client-id}}'
+            clientSecret: '{{args.oauth-client-secret}}'
+            scopes:
+            - profile
+        query: |
+          min(
+            kanary_up{namespace="{{args.namespace}}", tested_cluster="kflux-fedora-01", type="container-multi-arch"}
+            and on (tested_cluster, type)
+            (kanary_last_push_timestamp{namespace="{{args.namespace}}", tested_cluster="kflux-fedora-01", type="container-multi-arch"}
+              >= time() - {{args.max-signal-age-seconds}})
+          )
+    failureCondition: len(result) != 1 || result[0] != 1
+  - name: kanary-up-kflux-ocp-p01-single-arch
+    initialDelay: '{{args.initial-delay}}'
+    interval: '{{args.check-interval}}'
+    count: '{{args.check-count}}'
+    failureLimit: '{{args.failure-limit}}'
+    successCondition: len(result) == 1 && result[0] == 1
+    provider:
+      prometheus:
+        address: '{{args.prometheus-address}}'
+        timeout: 40
+        authentication:
+          oauth2:
+            tokenUrl: '{{args.token-url}}'
+            clientId: '{{args.oauth-client-id}}'
+            clientSecret: '{{args.oauth-client-secret}}'
+            scopes:
+            - profile
+        query: |
+          min(
+            kanary_up{namespace="{{args.namespace}}", tested_cluster="kflux-ocp-p01", type="container-single-arch"}
+            and on (tested_cluster, type)
+            (kanary_last_push_timestamp{namespace="{{args.namespace}}", tested_cluster="kflux-ocp-p01", type="container-single-arch"}
+              >= time() - {{args.max-signal-age-seconds}})
+          )
+    failureCondition: len(result) != 1 || result[0] != 1
+  - name: kanary-up-kflux-ocp-p01-multi-arch
+    initialDelay: '{{args.initial-delay}}'
+    interval: '{{args.check-interval}}'
+    count: '{{args.check-count}}'
+    failureLimit: '{{args.failure-limit}}'
+    successCondition: len(result) == 1 && result[0] == 1
+    provider:
+      prometheus:
+        address: '{{args.prometheus-address}}'
+        timeout: 40
+        authentication:
+          oauth2:
+            tokenUrl: '{{args.token-url}}'
+            clientId: '{{args.oauth-client-id}}'
+            clientSecret: '{{args.oauth-client-secret}}'
+            scopes:
+            - profile
+        query: |
+          min(
+            kanary_up{namespace="{{args.namespace}}", tested_cluster="kflux-ocp-p01", type="container-multi-arch"}
+            and on (tested_cluster, type)
+            (kanary_last_push_timestamp{namespace="{{args.namespace}}", tested_cluster="kflux-ocp-p01", type="container-multi-arch"}
+              >= time() - {{args.max-signal-age-seconds}})
+          )
+    failureCondition: len(result) != 1 || result[0] != 1
+  - name: kanary-up-kflux-osp-p01-single-arch
+    initialDelay: '{{args.initial-delay}}'
+    interval: '{{args.check-interval}}'
+    count: '{{args.check-count}}'
+    failureLimit: '{{args.failure-limit}}'
+    successCondition: len(result) == 1 && result[0] == 1
+    provider:
+      prometheus:
+        address: '{{args.prometheus-address}}'
+        timeout: 40
+        authentication:
+          oauth2:
+            tokenUrl: '{{args.token-url}}'
+            clientId: '{{args.oauth-client-id}}'
+            clientSecret: '{{args.oauth-client-secret}}'
+            scopes:
+            - profile
+        query: |
+          min(
+            kanary_up{namespace="{{args.namespace}}", tested_cluster="kflux-osp-p01", type="container-single-arch"}
+            and on (tested_cluster, type)
+            (kanary_last_push_timestamp{namespace="{{args.namespace}}", tested_cluster="kflux-osp-p01", type="container-single-arch"}
+              >= time() - {{args.max-signal-age-seconds}})
+          )
+    failureCondition: len(result) != 1 || result[0] != 1
+  - name: kanary-up-kflux-osp-p01-multi-arch
+    initialDelay: '{{args.initial-delay}}'
+    interval: '{{args.check-interval}}'
+    count: '{{args.check-count}}'
+    failureLimit: '{{args.failure-limit}}'
+    successCondition: len(result) == 1 && result[0] == 1
+    provider:
+      prometheus:
+        address: '{{args.prometheus-address}}'
+        timeout: 40
+        authentication:
+          oauth2:
+            tokenUrl: '{{args.token-url}}'
+            clientId: '{{args.oauth-client-id}}'
+            clientSecret: '{{args.oauth-client-secret}}'
+            scopes:
+            - profile
+        query: |
+          min(
+            kanary_up{namespace="{{args.namespace}}", tested_cluster="kflux-osp-p01", type="container-multi-arch"}
+            and on (tested_cluster, type)
+            (kanary_last_push_timestamp{namespace="{{args.namespace}}", tested_cluster="kflux-osp-p01", type="container-multi-arch"}
+              >= time() - {{args.max-signal-age-seconds}})
+          )
+    failureCondition: len(result) != 1 || result[0] != 1
+  - name: kanary-up-kflux-prd-rh03-single-arch
+    initialDelay: '{{args.initial-delay}}'
+    interval: '{{args.check-interval}}'
+    count: '{{args.check-count}}'
+    failureLimit: '{{args.failure-limit}}'
+    successCondition: len(result) == 1 && result[0] == 1
+    provider:
+      prometheus:
+        address: '{{args.prometheus-address}}'
+        timeout: 40
+        authentication:
+          oauth2:
+            tokenUrl: '{{args.token-url}}'
+            clientId: '{{args.oauth-client-id}}'
+            clientSecret: '{{args.oauth-client-secret}}'
+            scopes:
+            - profile
+        query: |
+          min(
+            kanary_up{namespace="{{args.namespace}}", tested_cluster="kflux-prd-rh03", type="container-single-arch"}
+            and on (tested_cluster, type)
+            (kanary_last_push_timestamp{namespace="{{args.namespace}}", tested_cluster="kflux-prd-rh03", type="container-single-arch"}
+              >= time() - {{args.max-signal-age-seconds}})
+          )
+    failureCondition: len(result) != 1 || result[0] != 1
+  - name: kanary-up-kflux-prd-rh03-multi-arch
+    initialDelay: '{{args.initial-delay}}'
+    interval: '{{args.check-interval}}'
+    count: '{{args.check-count}}'
+    failureLimit: '{{args.failure-limit}}'
+    successCondition: len(result) == 1 && result[0] == 1
+    provider:
+      prometheus:
+        address: '{{args.prometheus-address}}'
+        timeout: 40
+        authentication:
+          oauth2:
+            tokenUrl: '{{args.token-url}}'
+            clientId: '{{args.oauth-client-id}}'
+            clientSecret: '{{args.oauth-client-secret}}'
+            scopes:
+            - profile
+        query: |
+          min(
+            kanary_up{namespace="{{args.namespace}}", tested_cluster="kflux-prd-rh03", type="container-multi-arch"}
+            and on (tested_cluster, type)
+            (kanary_last_push_timestamp{namespace="{{args.namespace}}", tested_cluster="kflux-prd-rh03", type="container-multi-arch"}
+              >= time() - {{args.max-signal-age-seconds}})
+          )
+    failureCondition: len(result) != 1 || result[0] != 1
+  - name: kanary-up-stone-prod-p01-single-arch
+    initialDelay: '{{args.initial-delay}}'
+    interval: '{{args.check-interval}}'
+    count: '{{args.check-count}}'
+    failureLimit: '{{args.failure-limit}}'
+    successCondition: len(result) == 1 && result[0] == 1
+    provider:
+      prometheus:
+        address: '{{args.prometheus-address}}'
+        timeout: 40
+        authentication:
+          oauth2:
+            tokenUrl: '{{args.token-url}}'
+            clientId: '{{args.oauth-client-id}}'
+            clientSecret: '{{args.oauth-client-secret}}'
+            scopes:
+            - profile
+        query: |
+          min(
+            kanary_up{namespace="{{args.namespace}}", tested_cluster="stone-prod-p01", type="container-single-arch"}
+            and on (tested_cluster, type)
+            (kanary_last_push_timestamp{namespace="{{args.namespace}}", tested_cluster="stone-prod-p01", type="container-single-arch"}
+              >= time() - {{args.max-signal-age-seconds}})
+          )
+    failureCondition: len(result) != 1 || result[0] != 1
+  - name: kanary-up-stone-prod-p01-multi-arch
+    initialDelay: '{{args.initial-delay}}'
+    interval: '{{args.check-interval}}'
+    count: '{{args.check-count}}'
+    failureLimit: '{{args.failure-limit}}'
+    successCondition: len(result) == 1 && result[0] == 1
+    provider:
+      prometheus:
+        address: '{{args.prometheus-address}}'
+        timeout: 40
+        authentication:
+          oauth2:
+            tokenUrl: '{{args.token-url}}'
+            clientId: '{{args.oauth-client-id}}'
+            clientSecret: '{{args.oauth-client-secret}}'
+            scopes:
+            - profile
+        query: |
+          min(
+            kanary_up{namespace="{{args.namespace}}", tested_cluster="stone-prod-p01", type="container-multi-arch"}
+            and on (tested_cluster, type)
+            (kanary_last_push_timestamp{namespace="{{args.namespace}}", tested_cluster="stone-prod-p01", type="container-multi-arch"}
+              >= time() - {{args.max-signal-age-seconds}})
+          )
+    failureCondition: len(result) != 1 || result[0] != 1

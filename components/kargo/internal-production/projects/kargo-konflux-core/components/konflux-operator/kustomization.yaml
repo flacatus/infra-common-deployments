@@ -5,3 +5,4 @@ resources:
   - warehouse.yaml
   - promotiontasks
   - stages
+  - verifications
